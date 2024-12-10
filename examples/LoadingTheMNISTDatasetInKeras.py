@@ -26,6 +26,11 @@ def encode_labels(train_labels, test_labels):
 #Load MNIST dataset step
 ((train_images, train_labels), (test_images, test_labels)) = mnist.load_data()
 
+digit = train_images[4]
+import matplotlib.pyplot as plt
+plt.imshow(digit, cmap=plt.cm.binary)
+plt.show()
+
 #Network architecture step
 network = build_network_architecture()
 
