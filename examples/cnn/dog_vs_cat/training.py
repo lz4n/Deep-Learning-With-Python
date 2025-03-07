@@ -1,12 +1,7 @@
 import os
-
-from keras import layers
-from keras import models
-
-from keras import optimizers
-
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-
+import numpy as np
+from keras import layers, models, optimizers
+from tensorflow.keras.preprocessing.image import load_img, img_to_array
 import matplotlib.pyplot as plt
 
 dataset_dir = 'C:/Users/izanp/Downloads/cats_and_dogs_data'
@@ -14,8 +9,24 @@ train_dir = os.path.join(dataset_dir, 'train')
 validation_dir = os.path.join(dataset_dir, 'validation')
 test_dir = os.path.join(dataset_dir, 'test')
 
-from PIL import Image
-import os
+def load_data(data_dir, target_size=(150, 150)):
+    images = []
+    labels = []
+    for label in ['cat', 'dog']:
+        class_dir = os.path.join(data_dir, label)
+        for img_name in os.listdir(class_dir):
+            img_path = os.path.join(class_dir, img_name)
+            img = load_img(img_path, target_size=target_size)
+            img_array = img_to_array(img)
+            img_array = img_array / 255.0
+            images.append(img_array)
+            labels.append(1 if label == 'dog' else 0)
+    return np.array(images), np.array(labels)
+
+print("Datos de entrenamiento...")
+x_train, y_train = load_data(train_dir)
+print("Datos de validacion...")
+x_val, y_val = load_data(validation_dir)
 
 model = models.Sequential()
 model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)))
@@ -31,45 +42,25 @@ model.add(layers.Dense(512, activation='relu'))
 model.add(layers.Dense(1, activation='sigmoid'))
 
 model.compile(loss='binary_crossentropy',
-               optimizer=optimizers.RMSprop(learning_rate=1e-4),
-               metrics=['acc'])
-
-train_datagen = ImageDataGenerator(rescale=1./255)
-validation_datagen = ImageDataGenerator(rescale=1./255)
-
-train_generator = train_datagen.flow_from_directory(
- train_dir,
- target_size=(150, 150),
- batch_size=20,
- shuffle=True,
- class_mode='binary'
-)
-
-validation_generator = validation_datagen.flow_from_directory(
- validation_dir,
- target_size=(150, 150),
- batch_size=20,
- shuffle=True,
- class_mode='binary'
-)
+             optimizer=optimizers.RMSprop(learning_rate=1e-4),
+             metrics=['acc'])
 
 history = model.fit(
- train_generator,
- steps_per_epoch=train_generator.samples // train_generator.batch_size,
- epochs=30,
- validation_data=validation_generator,
- validation_steps=validation_generator.samples // validation_generator.batch_size
+    x_train, y_train,
+    epochs=15,
+    batch_size=20,
+    validation_data=(x_val, y_val)
 )
-
 
 model.save('cats_and_dogs.h5')
 
+# Plot results
 acc = history.history['acc']
 val_acc = history.history['val_acc']
 loss = history.history['loss']
 val_loss = history.history['val_loss']
 
-epochs = range(1, len(acc) +1)
+epochs = range(1, len(acc) + 1)
 
 plt.plot(epochs, acc, 'bo', label='Training acc')
 plt.plot(epochs, val_acc, 'b', label='Validation acc')

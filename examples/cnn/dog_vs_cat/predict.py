@@ -5,7 +5,7 @@ from tensorflow.keras.preprocessing import image
 
 model = load_model('cats_and_dogs.h5')
 
-img_path = "C:/Users/izanp/Downloads/NationalGeographic_2572187_3x2.png"
+img_path = "C:/Users/izanp/Downloads/cats_and_dogs_data/test/cat/1503.jpg"
 
 img = image.load_img(img_path, target_size=(150, 150))
 img_array = image.img_to_array(img)
