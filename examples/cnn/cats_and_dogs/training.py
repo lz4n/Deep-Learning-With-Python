@@ -77,7 +77,7 @@ val_ds = tf.data.Dataset.from_generator(
 history = model.fit(
     tra_ds,
     steps_per_epoch=steps_per_epoch,  # 100
-    epochs=100,
+    epochs=200,
     validation_data=val_ds,
     validation_steps=validation_steps,  # 50
 )
